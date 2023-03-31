@@ -6,52 +6,57 @@ from sqlalchemy.orm import Session
 
 from constants.custom_types import RoleEnum
 from routes import get_db_session, Authorize, AuthorizedUser
-from schemas.user import AdminSchema
-from services.user import UserService
+from schemas.common import SuccessSchema
+from schemas.hotel import HotelSchema
+from schemas.partner import PartnerSchema
+from schemas.user import UserSchema, AdminSchema
+from services.hotel import HotelService
 
-router = APIRouter(prefix='/users')
+router = APIRouter(prefix='/hotels')
 
 
-@router.get('/hotelAdmins', response_model=List[AdminSchema])
-async def get_hotel_admins(session: Session = Depends(get_db_session),
-                           # authorized_user: AuthorizedUser = Depends(Authorize())
-                           ):
-    user = UserService(session=session).get_hotel_admins()
+@router.post('', response_model=SuccessSchema)
+async def create_hotel(hotel: HotelSchema,
+                       session: Session = Depends(get_db_session),
+                       # authorized_user=Depends(Authorize())
+                       ):
+    HotelService(session=session).add_hotel(hotel)
+    return SuccessSchema()
+
+
+@router.post('/{id}/admin', response_model=SuccessSchema)
+async def create_hotel_admin(id: int, data: UserSchema,
+                             session: Session = Depends(get_db_session)):
+    HotelService(session=session).create_hotel_admin(id, data)
+    return SuccessSchema()
+
+
+@router.get('', response_model=List[HotelSchema])
+async def get_hotels(session: Session = Depends(get_db_session),
+                     # authorized_user: AuthorizedUser = Depends(Authorize())
+                     ):
+    user = HotelService(session=session).get_hotels()
     return user
 
-@router.get('/partnerAdmins', response_model=List[AdminSchema])
-async def get_hotel_admins(session: Session = Depends(get_db_session),
+
+@router.get('/{id}/admins', response_model=List[AdminSchema])
+async def get_hotel_admins(id: int, session: Session = Depends(get_db_session),
                            # authorized_user: AuthorizedUser = Depends(Authorize())
                            ):
-    user = UserService(session=session).get_partner_admins()
+    user = HotelService(session=session).get_hotel_admins(id)
     return user
 
-#
-# @router.post('/inviteNewUser', response_model=SuccessSchema)
-# async def invite_new_user(user: UserInviteSchema, session: Session = Depends(get_db_session),
-#                           authorized_user=Depends(Authorize(RoleEnum.admin))):
-#     UserService(session=session).invite_new_user(user=user, authorized_user=authorized_user)
+# @router.post('/{id}/partners', response_model=SuccessSchema)
+# async def create_partner(id: int, data: PartnerSchema,
+#                              session: Session = Depends(get_db_session)):
+#     HotelService(session=session).create_partner(id, data)
 #     return SuccessSchema()
-#
-#
-# @router.post('/verifyInvitation', response_model=InvitationVerifySchema)
-# async def verify_by_token(invitation_token=Body(..., embed=True, alias="invitationToken"),
-#                           session: Session = Depends(get_db_session)):
-#     response_schema = UserService(session=session).get_user_by_token(invitation_token)
-#     return response_schema
-#
-#
+
 # @router.post('/signUp', response_model=SuccessSchema)
 # async def create_user(user: UserUnprotectedSchema, session: Session = Depends(get_db_session)):
 #     UserService(session=session).create_user(user_in=user)
 #     return SuccessSchema()
 #
-#
-# @router.get('/{id}', response_model=UserOutDetailSchema)
-# async def get_user_by_id(id: UUID, session: Session = Depends(get_db_session),
-#                          authorized_user: AuthorizedUser = Depends(Authorize())):
-#     user = UserService(session=session).get_user_by_id(id)
-#     return user
 #
 #
 # @router.get('/{id}/agents', response_model=UserOutItemsSchema)

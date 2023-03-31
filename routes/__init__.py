@@ -27,10 +27,10 @@ def get_db_session():
     session = dbm.SessionFactory()
     try:
         yield session
-    except Exception as e:
-        logger.exception("Session failed:", extra=extra)
-        session.rollback()
-        session.flush()
+    # except Exception as e:
+    #     logger.exception("Session failed:", extra=extra)
+    #     session.rollback()
+    #     session.flush()
     finally:
         logger.debug("closed db session")
         session.close()

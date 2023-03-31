@@ -1,4 +1,5 @@
 class ErrorMessages:
+
     # Client Error Messages
     DUPLICATE_EMAIL_IN_REGISTRATION = ("CRM_1001", "Duplicate email.", "Email should be unique.")
     INVALID_CONFIRMATION_TOKEN = ("CRM_1002", "Invalid confirmation token.", "")

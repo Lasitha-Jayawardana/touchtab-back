@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Enum, Unicode, ForeignKey, DateTime, Inte
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PasswordType
 
-from constants.custom_types import RoleEnum, RoomTypeEnum, FoodTypeEnum
+from constants.custom_types import RoleEnum, RoomTypeEnum, FoodTypeEnum, ServiceCategoryEnum
 from database import Base
 from constants.commons import Constant
 from sqlalchemy.orm import relationship, backref
@@ -21,6 +21,8 @@ class User(Base):
     phone = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
 
+    admin = relationship("Admin", back_populates="user", uselist=False)
+
     last_login = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now)
 
@@ -30,13 +32,12 @@ class Admin(Base):
     id = Column(Integer, primary_key=True)
 
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", backref=backref("admin", uselist=False))
+    user = relationship("User", back_populates="admin")
     hotel = relationship("Hotel", back_populates="hotel_admins")
     hotel_id = Column(Integer, ForeignKey("hotel.id"))
 
     partner_id = Column(Integer, ForeignKey("partner.id"))
     partner = relationship("Partner", back_populates="partner_admins")
-
 
 
 class Guest(Base):
@@ -47,18 +48,17 @@ class Guest(Base):
     user = relationship("User", backref=backref("guest", uselist=False))
 
 
-
 class Hotel(Base):
     __tablename__ = "hotel"
     id = Column(Integer, primary_key=True)
-    name = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
+    name = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"), unique=True)
     location = Column(String(Constant.DB_STRING_SIZE, collation="utf8mb4_bin"))
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
     wifi_password = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
 
     hotel_admins = relationship("Admin", back_populates="hotel")
-    rooms =  relationship("Room", back_populates="hotel")
-    services =  relationship("Service", back_populates="hotel")
+    rooms = relationship("Room", back_populates="hotel")
+    services = relationship("Service", back_populates="hotel")
 
 
 class Room(Base):
@@ -74,7 +74,7 @@ class Room(Base):
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
 
     hotel_id = Column(Integer, ForeignKey("hotel.id"))
-    hotel =  relationship("Hotel", back_populates="rooms")
+    hotel = relationship("Hotel", back_populates="rooms")
 
 
 class Service(Base):
@@ -83,19 +83,18 @@ class Service(Base):
     name = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
     description = Column(String(Constant.DB_STRING_SIZE, collation="utf8mb4_bin"))
 
-    service_category = Column(Enum(RoomTypeEnum))
-
+    service_category = Column(Enum(ServiceCategoryEnum))
 
     hotel_id = Column(Integer, ForeignKey("hotel.id"))
-    hotel =  relationship("Hotel", back_populates="services")
+    hotel = relationship("Hotel", back_populates="services")
 
     partner_id = Column(Integer, ForeignKey("partner.id"))
-    partner =  relationship("Partner", back_populates="services")
+    partner = relationship("Partner", back_populates="services")
 
-    meeting_rooms =  relationship("MeetingRoom", back_populates="service")
-    baby_sitters =  relationship("BabySitter", back_populates="service")
-    boats =  relationship("Boat", back_populates="boats")
-    restaurants =  relationship("Restaurant", back_populates="service")
+    meeting_room = relationship("MeetingRoom", back_populates="service", uselist=False)
+    baby_sitter = relationship("BabySitter", back_populates="service", uselist=False)
+    boat = relationship("Boat", back_populates="service", uselist=False)
+    restaurant = relationship("Restaurant", back_populates="service", uselist=False)
 
 
 class Partner(Base):
@@ -104,7 +103,7 @@ class Partner(Base):
     name = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
     location = Column(String(Constant.DB_STRING_SIZE, collation="utf8mb4_bin"))
 
-    services =  relationship("Service", back_populates="partner")
+    services = relationship("Service", back_populates="partner")
 
     partner_admins = relationship("Admin", back_populates="partner")
 
@@ -122,8 +121,7 @@ class MeetingRoom(Base):
     availability = Column(Boolean, default=False)
 
     service_id = Column(Integer, ForeignKey("service.id"))
-    service =  relationship("Service", back_populates="meeting_rooms")
-
+    service = relationship("Service", back_populates="meeting_room")
 
 
 class BabySitter(Base):
@@ -139,7 +137,7 @@ class BabySitter(Base):
     reserved = Column(Integer)
 
     service_id = Column(Integer, ForeignKey("service.id"))
-    service = relationship("Service", back_populates="baby_sitters")
+    service = relationship("Service", back_populates="baby_sitter")
 
 
 class Boat(Base):
@@ -157,24 +155,26 @@ class Boat(Base):
     reserved = Column(Integer)
 
     service_id = Column(Integer, ForeignKey("service.id"))
-    service = relationship("Service", back_populates="boats")
+    service = relationship("Service", back_populates="boat")
 
 
-class Restuarant(Base):
-    __tablename__ = "restuarant"
+class Restaurant(Base):
+    __tablename__ = "restaurant"
     id = Column(Integer, primary_key=True)
     name = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
     cuisine_type = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
 
     place = Column(String(Constant.DB_STRING_SIZE, collation="utf8mb4_bin"))
     description = Column(String(Constant.DB_STRING_SIZE, collation="utf8mb4_bin"))
-    open_time = Column(DateTime)
-    close_time = Column(DateTime)
+    # open_time = Column(DateTime)
+    # close_time = Column(DateTime)
+    open_time = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
+    close_time = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
 
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
 
     service_id = Column(Integer, ForeignKey("service.id"))
-    service = relationship("Service", back_populates="restuarants")
+    service = relationship("Service", back_populates="restaurant")
 
     food_menus = relationship("FoodMenu", back_populates="restaurant")
 
@@ -190,8 +190,8 @@ class FoodMenu(Base):
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
     type = Column(Enum(FoodTypeEnum))
 
-    restuarant_id = Column(Integer, ForeignKey("restuarant.id"))
-    restuarant = relationship("Restuarant", back_populates="food_menus")
+    restaurant_id = Column(Integer, ForeignKey("restaurant.id"))
+    restaurant = relationship("Restaurant", back_populates="food_menus")
 
     food_category_id = Column(Integer, ForeignKey("food_category.id"))
     food_category = relationship("FoodCategory", back_populates="food_menus")

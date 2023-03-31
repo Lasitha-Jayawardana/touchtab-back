@@ -78,7 +78,7 @@ async def verify_otp_token(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, ErrorMessages.INVALID_USERNAME_OTP)
     token = authentication_service.verify_OTP(otp_token)
     reset_user = ResetOTPSchema(email=email, token=token)
-    return reset_use
+    return reset_user
 
 
 @router.put('/reset', response_model=SuccessSchema)

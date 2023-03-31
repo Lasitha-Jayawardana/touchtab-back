@@ -5,7 +5,7 @@ from pydantic.utils import GetterDict
 # from pydantic import AnyUrl
 #
 # from constants.custom_types import RoleEnum
-# from schemas.common import BaseModel, ContentSchema
+# from schemas.common import BaseModel, MetaSchema
 #
 #
 # class ObjectMapper(GetterDict):
@@ -29,16 +29,16 @@ from pydantic.utils import GetterDict
 # class AddressSchema(BaseModel):
 #     id: Optional[UUID]
 #     street_address: Optional[str]
-#     country: ContentSchema
-#     state: ContentSchema
-#     city: ContentSchema
+#     country: MetaSchema
+#     state: MetaSchema
+#     city: MetaSchema
 #     zip_code: Optional[str]
 #
 #
 # class AddressOutSchema(AddressSchema):
-#     country: Optional[ContentSchema]
-#     state: Optional[ContentSchema]
-#     city: Optional[ContentSchema]
+#     country: Optional[MetaSchema]
+#     state: Optional[MetaSchema]
+#     city: Optional[MetaSchema]
 #
 #
 # class InvitationVerifySchema(BaseModel):

@@ -5,28 +5,21 @@ from pydantic import EmailStr, AnyUrl
 
 from constants.custom_types import RoleEnum
 from schemas.common import BaseModel
-from schemas.hotel import HotelSchema
-from schemas.partner import PartnerSchema
 
 
-class UserSchema(BaseModel):
+class HotelSchema(BaseModel):
     id: Optional[int]
     name: str
-    email: EmailStr
-    phone: Optional[str]
-    role: Optional[RoleEnum]
+    location:str = None
     image_url: Optional[AnyUrl]
-
-
-class UserUnprotectedSchema(UserSchema):
-    password: Union[bytes, str]
-
-
-class AdminSchema(UserSchema):
-    hotel: Optional[HotelSchema]
-    partner: Optional[PartnerSchema]
-
-
+    wifi_password: Optional[str]
+    # hotel_admins:Optional[List[UserSchema]]
+#
+# class UserOutSchema(UserSchema):
+#     status: StatusEnum
+#     created_user: Optional[ResponsiblePersonSchema]
+#
+#
 # class UserOutItemsSchema(BaseModel):
 #     items: List[UserOutSchema]
 #

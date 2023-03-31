@@ -45,7 +45,7 @@ class DatabaseManager:
 
     @staticmethod
     def _import_entities():
-        from models.user import User, Fund, Department, Strategy, AssetClass
+        from models.user import User
 
     def get_test_session(self):
         """Use only for (unit) tests"""

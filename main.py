@@ -7,7 +7,7 @@ from starlette import status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response, RedirectResponse
 
-from routes import get_db_session,  authentication
+from routes import get_db_session, authentication, hotels, user, partner, service, meta
 from utilities.exceptions import exception_handlers, HTTPException
 from utilities.logger import logger
 
@@ -76,10 +76,11 @@ async def catch_exceptions_middleware(request: Request, call_next):
 app.middleware('http')(catch_exceptions_middleware)
 
 app.include_router(authentication.router, prefix="/api", tags=["Auth Endpoint"])
-# app.include_router(fund_admin.router, prefix="/api", tags=["Fund Admin Endpoint"])
-# app.include_router(investor.router, prefix="/api", tags=["Investor Endpoint"])
-# app.include_router(investor_admin.router, prefix="/api", tags=["Investor Admin Endpoint"])
-# app.include_router(super_admin.router, prefix="/api", tags=["Super Admin Endpoint"])
+app.include_router(hotels.router, prefix="/api", tags=["Hotels Endpoint"])
+app.include_router(user.router, prefix="/api", tags=["Users Endpoint"])
+app.include_router(partner.router, prefix="/api", tags=["Partners Endpoint"])
+app.include_router(service.router, prefix="/api", tags=["Services Endpoint"])
+app.include_router(meta.router, prefix="/api", tags=["Meta Endpoint"])
 # app.include_router(fund_user.router, prefix="/api", tags=["Fund USer Endpoint"])
 
 app.add_middleware(
