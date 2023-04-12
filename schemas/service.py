@@ -31,6 +31,30 @@ class RestaurantSchema(ServiceSchema):
     image_url: str = None
 
 
+class BoatSchema(ServiceSchema):
+    seats: int
+    place: str = None
+    start_time: datetime = None
+    end_time: datetime = None
+    description: str = None
+    image_url: str = None
+    price: float
+    rate: float
+    reserved: int
+
+
+class BabySitterSchema(ServiceSchema):
+    place: str = None
+    open_time: str = None
+    close_time: str = None
+    description: str = None
+    image_url: str = None
+    reserved: int = None
+    capacity: int
+    rate: float
+    price: float
+
+
 class FoodSchema(BaseModel):
     id: Optional[int]
     name: str

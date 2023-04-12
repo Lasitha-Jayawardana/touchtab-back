@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from constants.custom_types import RoleEnum
 from routes import get_db_session, Authorize, AuthorizedUser
 from schemas.common import SuccessSchema
-from schemas.service import MeetingRoomSchema, RestaurantSchema, FoodSchema
+from schemas.service import MeetingRoomSchema, RestaurantSchema, FoodSchema, BabySitterSchema, BoatSchema
 from services.service import ServiceService
 
 router = APIRouter(prefix='/hotels/{id}')
@@ -73,6 +73,20 @@ async def get_hotels(id: int, session: Session = Depends(get_db_session),
                      # authorized_user: AuthorizedUser = Depends(Authorize())
                      ):
     user = ServiceService(session=session).get_restaurants(id)
+    return user
+
+@router.get('/babySitters', response_model=List[BabySitterSchema])
+async def get_hotels(id: int, session: Session = Depends(get_db_session),
+                     # authorized_user: AuthorizedUser = Depends(Authorize())
+                     ):
+    user = ServiceService(session=session).get_baby_sitters(id)
+    return user
+
+@router.get('/boats', response_model=List[BoatSchema])
+async def get_hotels(id: int, session: Session = Depends(get_db_session),
+                     # authorized_user: AuthorizedUser = Depends(Authorize())
+                     ):
+    user = ServiceService(session=session).get_boats(id)
     return user
 
 #

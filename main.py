@@ -7,7 +7,7 @@ from starlette import status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response, RedirectResponse
 
-from routes import get_db_session, authentication, hotels, user, partner, service, meta
+from routes import get_db_session, authentication, hotels, user, partner, service, meta, rooms
 from utilities.exceptions import exception_handlers, HTTPException
 from utilities.logger import logger
 
@@ -81,6 +81,7 @@ app.include_router(user.router, prefix="/api", tags=["Users Endpoint"])
 app.include_router(partner.router, prefix="/api", tags=["Partners Endpoint"])
 app.include_router(service.router, prefix="/api", tags=["Services Endpoint"])
 app.include_router(meta.router, prefix="/api", tags=["Meta Endpoint"])
+app.include_router(rooms.router, prefix="/api", tags=["Rooms Endpoint"])
 # app.include_router(fund_user.router, prefix="/api", tags=["Fund USer Endpoint"])
 
 app.add_middleware(

@@ -22,6 +22,7 @@ class User(Base):
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
 
     admin = relationship("Admin", back_populates="user", uselist=False)
+    guest = relationship("Guest", back_populates="user", uselist=False)
 
     last_login = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now)
@@ -45,7 +46,12 @@ class Guest(Base):
     id = Column(Integer, primary_key=True)
 
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", backref=backref("guest", uselist=False))
+    user = relationship("User", back_populates="guest")
+
+    hotel = relationship("Hotel", back_populates="guests")
+    hotel_id = Column(Integer, ForeignKey("hotel.id"))
+
+    reservation = relationship("Reservation", back_populates="guest", uselist=False)
 
 
 class Hotel(Base):
@@ -57,6 +63,7 @@ class Hotel(Base):
     wifi_password = Column(String(Constant.DB_STRING_SHORT, collation="utf8mb4_bin"))
 
     hotel_admins = relationship("Admin", back_populates="hotel")
+    guests = relationship("Guest", back_populates="hotel")
     rooms = relationship("Room", back_populates="hotel")
     services = relationship("Service", back_populates="hotel")
 
@@ -75,6 +82,22 @@ class Room(Base):
 
     hotel_id = Column(Integer, ForeignKey("hotel.id"))
     hotel = relationship("Hotel", back_populates="rooms")
+
+    reservation = relationship("Reservation", back_populates="room", uselist=False)
+
+
+class Reservation(Base):
+    __tablename__ = "reservation"
+    id = Column(Integer, primary_key=True)
+
+    check_in = Column(DateTime)
+    check_out = Column(DateTime)
+
+    guest_id = Column(Integer, ForeignKey("guest.id"))
+    room_id = Column(Integer, ForeignKey("room.id"))
+
+    guest = relationship("Guest", back_populates="reservation")
+    room = relationship("Room", back_populates="reservation")
 
 
 class Service(Base):
@@ -134,7 +157,7 @@ class BabySitter(Base):
     price = Column(Float)
     rate = Column(Float)
     image_url = Column(Unicode(Constant.DB_STRING_TEXT, collation="utf8mb4_bin"))
-    reserved = Column(Integer)
+    reserved = Column(Integer,default=0)
 
     service_id = Column(Integer, ForeignKey("service.id"))
     service = relationship("Service", back_populates="baby_sitter")
@@ -175,6 +198,7 @@ class Restaurant(Base):
 
     service_id = Column(Integer, ForeignKey("service.id"))
     service = relationship("Service", back_populates="restaurant")
+    capacity = Column(Integer)
 
     food_menus = relationship("FoodMenu", back_populates="restaurant")
 

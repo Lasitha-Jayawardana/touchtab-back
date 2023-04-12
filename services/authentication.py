@@ -8,8 +8,9 @@ from starlette import status
 
 from constants.custom_types import TokenIssuerEnum, RoleEnum
 from env import CREDENTIALS
-from models.user import User
+from models.user import User, Admin
 from schemas.authentication import TokenPayloadSchema, TokenUserSchema, ResetSchema, ResetOTPSchema
+from schemas.common import MetaSchema
 from services.mail import EmailService
 from utilities.exceptions import HTTPException
 from constants.exceptions import ErrorMessages
@@ -87,13 +88,30 @@ class AuthenticationService:
         return cls._instance
 
     def _create_user_token(self) -> TokenUserSchema:
-        orm_user = self._orm_user
-        access_token = self.token_service.encode_token(orm_user.id, TokenIssuerEnum.access)
-        refresh_token = self.token_service.encode_token(orm_user.id, TokenIssuerEnum.refresh)
+        orm_user: User = self._orm_user
+        hotel = None
+        if orm_user.role == RoleEnum.guest:
+            role_user = orm_user.guest
+        else:
+            role_user: Admin = orm_user.admin
 
-        token_user = TokenUserSchema.from_orm(orm_user)
-        token_user.access_token = access_token
-        token_user.refresh_token = refresh_token
+        if role_user.hotel:
+            hotel = MetaSchema.from_orm(role_user.hotel)
+
+        access_token = self.token_service.encode_token(role_user.id, TokenIssuerEnum.access)
+        refresh_token = self.token_service.encode_token(role_user.id, TokenIssuerEnum.refresh)
+
+        token_user = TokenUserSchema(
+            id=role_user.id,
+            email=orm_user.email,
+            role=orm_user.role,
+            name=orm_user.name,
+            image_url=orm_user.image_url,
+            hotel=hotel,
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
+
         return token_user
 
     def check_account_status(self) -> bool:
@@ -117,7 +135,7 @@ class AuthenticationService:
     def login_user(self, password):
         try:
             if True:
-            # if self._orm_user.password == password:
+                # if self._orm_user.password == password:
                 # if self.check_account_status():
                 return self._create_user_token()
                 # else:

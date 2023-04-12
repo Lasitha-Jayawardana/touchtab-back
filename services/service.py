@@ -4,10 +4,10 @@ from sqlalchemy import select
 
 from constants.custom_types import RoleEnum, ServiceCategoryEnum
 from constants.exceptions import ErrorMessages
-from models.user import Hotel, User, Admin, Partner, MeetingRoom, Service, Restaurant, FoodMenu
+from models.user import Hotel, User, Admin, Partner, MeetingRoom, Service, Restaurant, FoodMenu, FoodCategory
 from schemas.hotel import HotelSchema
 from schemas.partner import PartnerSchema
-from schemas.service import MeetingRoomSchema, RestaurantSchema, FoodSchema
+from schemas.service import MeetingRoomSchema, RestaurantSchema, FoodSchema, BabySitterSchema, BoatSchema
 from schemas.user import UserSchema, AdminSchema
 from services.user import UserService
 
@@ -90,12 +90,17 @@ class ServiceService:
         if not restaurant:
             raise HTTPException(status_code=401, message='Hotel not found')
 
+        stmt = select(FoodCategory).where(FoodCategory.name == data.food_category.name)
+        food_category: FoodCategory = self.session.execute(stmt).scalars().first()
+        if not food_category:
+            food_category = FoodCategory(name=data.food_category.name)
+
         try:
             food = FoodMenu(name=data.name,
                             description=data.description,
                             price=data.price,
                             type=data.type,
-                            food_category_id=data.food_category.id,
+                            food_category=food_category,
                             restaurant=restaurant,
                             image_url=data.image_url)
 
@@ -126,6 +131,34 @@ class ServiceService:
         for service in services:
             if service.restaurant:
                 schema = RestaurantSchema.from_orm(service.restaurant)
+                if service.partner:
+                    schema.partner = PartnerSchema.from_orm(service.partner)
+                res.append(schema)
+        return res
+
+    def get_baby_sitters(self, id):
+        stmt = select(Service).join(Hotel).where(Service.service_category == ServiceCategoryEnum.baby_sitter).where(
+            Hotel.id == id)
+        services: List[Service] = self.session.execute(stmt).scalars().all()
+
+        res = []
+        for service in services:
+            if service.baby_sitter:
+                schema = BabySitterSchema.from_orm(service.baby_sitter)
+                if service.partner:
+                    schema.partner = PartnerSchema.from_orm(service.partner)
+                res.append(schema)
+        return res
+
+    def get_boats(self, id):
+        stmt = select(Service).join(Hotel).where(Service.service_category == ServiceCategoryEnum.boat).where(
+            Hotel.id == id)
+        services: List[Service] = self.session.execute(stmt).scalars().all()
+
+        res = []
+        for service in services:
+            if service.boat:
+                schema = BoatSchema.from_orm(service.boat)
                 if service.partner:
                     schema.partner = PartnerSchema.from_orm(service.partner)
                 res.append(schema)
