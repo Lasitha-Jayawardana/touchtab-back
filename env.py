@@ -12,9 +12,9 @@ class Credentials(BaseSettings):
     MYSQL_DATABASE: str
     MYSQL_CHARSET: str
 
-    TWILIO_ACCOUNT_SID: str
-    TWILIO_AUTH_TOKEN: str
-    TWILIO_NUMBER: str
+    TWILIO_ACCOUNT_SID: str = None
+    TWILIO_AUTH_TOKEN: str = None
+    TWILIO_NUMBER: str = None
 
     # EMAIL_SMTP_SERVER: str
     # EMAIL_PORT: int
