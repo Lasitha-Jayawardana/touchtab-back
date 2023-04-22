@@ -1,9 +1,11 @@
+from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
 
-from database import Base
-from utilities.logger import logger, extra
 from env import CREDENTIALS
+
+from utilities.logger import logger
 
 
 class DatabaseManager:
@@ -22,42 +24,49 @@ class DatabaseManager:
 
             cls._instance.engine = cls._instance._get_engine()
 
-            cls._instance._import_entities()
-            Base.metadata.create_all(cls._instance.engine)
-            logger.debug("Meta created", extra=extra)
+            cls._instance.SessionFactory = sessionmaker(
+                autocommit=False, autoflush=True, bind=cls._instance.engine
+            )
 
-            cls._instance.SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=cls._instance.engine)
-            logger.debug("Session factory created", extra=extra)
+            cls._instance.Base = declarative_base()
+
+            logger.debug("Session factory created")
 
         return cls._instance
+
+    def _get_engine(self):
+        connect_string = self._get_db_string()
+        engine = create_engine(
+            connect_string,
+            echo=False,
+            isolation_level="SERIALIZABLE",
+            pool_recycle=3600
+        )
+        return engine
 
     def _get_db_string(self):
         db_string = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}' \
             .format(self.db_user, self.db_pass, self.db_host, self.db_port, self.database, self.charset)
         return db_string
 
-    def _get_engine(self):
-        connect_string = self._get_db_string()
-        engine = create_engine(connect_string, echo=False, isolation_level='SERIALIZABLE', pool_recycle=3600,
-                               future=True)
-        logger.debug("Engine created", extra=extra)
-        return engine
+    # Not used atm.
+    def _import_entities(self):
+        pass
 
-    @staticmethod
-    def _import_entities():
-        from models.user import User
-
-    def get_test_session(self):
+    def get_session(self):
         """Use only for (unit) tests"""
-        Session = scoped_session(self.SessionFactory)
+        Session = scoped_session(self.session_factory)
         current_session = Session()
         return current_session
 
-    @staticmethod
-    def safe_commit(session):
+    @classmethod
+    def safe_commit(self, session):
         try:
             session.commit()
         except Exception as e:
-            logger.exception("Commit failed:", extra=extra)
+            logger.exception("Commit failed at safe commit")
             session.rollback()
             session.flush()
+
+    def close(self, session):
+        session.remove()
